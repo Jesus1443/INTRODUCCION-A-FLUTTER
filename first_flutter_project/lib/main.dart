@@ -15,15 +15,15 @@ class MyClass extends StatelessWidget {
         appBar: AppBar(
           elevation: 10.0,
           title: Center(
-            child: Text('title'),
+            child: Text('Title'),
           ),
           actions: <Widget>[
             Icon(Icons.settings)
           ],
-          bottom: PreferredSize(
+          /*bottom: PreferredSize(
             preferredSize: Size.fromHeight(40.0),
             child: Text('This is a text in app bar'),
-          ),
+          ),*/
         ),
         body: SecondClass() 
       )
