@@ -7,11 +7,15 @@ class SecondClass extends StatefulWidget {
 
 class _SecondClassState extends State<SecondClass> {
   final _formKey = GlobalKey<FormState>();
+
+  String name = '';
+  int age = 0;
+  String password = '';
   String maritalStatus = 'single';
   bool termsChecked = true;
-  String? selectedLocation;
 
   List<String> locations = ['A', 'B', 'C', 'D'];
+  String? selectedLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +42,14 @@ class _SecondClassState extends State<SecondClass> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a name';
+                        return 'Please enter your name';
                       }
                       return null;
+                    },
+                    onSaved: (value) {
+                      setState(() {
+                        name = value!;
+                      });
                     },
                   ),
                   TextFormField(
@@ -58,6 +67,11 @@ class _SecondClassState extends State<SecondClass> {
                       }
                       return null;
                     },
+                    onSaved: (value) {
+                      setState(() {
+                        age = int.parse(value!);
+                      });
+                    },
                   ),
                   TextFormField(
                     obscureText: true,
@@ -69,10 +83,15 @@ class _SecondClassState extends State<SecondClass> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a password';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters long';
+                      if (value.length < 8) {
+                        return 'Password should be more than 8 characters long';
                       }
                       return null;
+                    },
+                    onSaved: (value) {
+                      setState(() {
+                        password = value!;
+                      });
                     },
                   ),
 
@@ -86,9 +105,9 @@ class _SecondClassState extends State<SecondClass> {
                         child: Text(location),
                       );
                     }).toList(),
-                    onChanged: (String? value) {
+                    onChanged: (newvalue) {
                       setState(() {
-                        selectedLocation = value;
+                        selectedLocation = newvalue;
                       });
                     },
                   ),
@@ -145,11 +164,7 @@ class _SecondClassState extends State<SecondClass> {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print("Registro enviado");
-                      } else {
-                        print("Error en el formulario");
-                      }
+                      onPressedSubmit(context);
                     },
                     child: const Text('Register'),
                   ),
@@ -160,5 +175,19 @@ class _SecondClassState extends State<SecondClass> {
         ),
       ),
     );
+  }
+
+    void onPressedSubmit(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      print("Nombre: $name");
+      print("Edad: $age");
+      print("Password: $password");
+      print("Ciudad: $selectedLocation");
+      print("Estado civil: $maritalStatus");
+      print("Aceptó términos: $termsChecked");
+      
+    }
   }
 }
