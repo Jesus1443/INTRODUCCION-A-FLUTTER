@@ -13,7 +13,17 @@ class MyClass extends StatelessWidget {
       title: 'My flutter app',
       home: Scaffold(
         appBar: AppBar(
-          title: Text('title'),
+          elevation: 10.0,
+          title: Center(
+            child: Text('title'),
+          ),
+          actions: <Widget>[
+            Icon(Icons.settings)
+          ],
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(40.0),
+            child: Text('This is a text in app bar'),
+          ),
         ),
         body: SecondClass() 
       )
