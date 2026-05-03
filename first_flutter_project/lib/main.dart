@@ -1,23 +1,18 @@
-import 'package:first_flutter_project/screens/first_screen.dart';
-import 'package:first_flutter_project/screens/second_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() =>  runApp( MyClass());
+void main() =>  runApp( MyApp());
 
 
-class MyClass extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My flutter app',
-      routes: <String, WidgetBuilder>{
-        '/screen1': (BuildContext context) => SecondClass(),
-        '/screen2': (BuildContext context) => SecondPageClass(),
-        
-      },
-      home: SecondClass(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
     );
   }
 }
