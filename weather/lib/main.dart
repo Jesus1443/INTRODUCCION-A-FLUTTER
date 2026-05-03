@@ -26,7 +26,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  fetchPosts() async{
 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,26 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body:Container(
-        child:  ListView.builder(
+        child: FutureBuilder(
+          future: fetchPosts(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if(snapshot.data == null){
+              return Container(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                )
+              );
+            }
+            else if(snapshot.data!=null){
+              if(snapshot.data=="Sorry for Inconvenience, Server Under Maintenance"){
+                return Container(
+                  child: Center(
+                    child: Text(snapshot.data),
+                  )
+                );
+              }
+              else{
+                return ListView.builder(
           
             itemBuilder: (BuildContext context,int index){
               
@@ -88,7 +109,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           );
-    })
+    });
+              }
+            }
+            throw UnimplementedError();
+          },
+          ) 
     ));
 
     
