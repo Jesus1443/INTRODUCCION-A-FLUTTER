@@ -1,122 +1,174 @@
 import 'package:flutter/material.dart';
-void main() => runApp(MyApp());
+import 'package:http/http.dart' as http;
+import 'package:weather/modules/global.dart';
+import 'package:weather/modules/whetherApi.dart';
+import 'dart:convert';
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Wheather App',
       theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        primarySwatch: Colors.blue,
+      ),
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(title: 'Wheather'),
+      home: const MyHomePage(title: 'Wheather'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  fetchPosts() async{
+  List<Color> colors = [
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.orange,
+    Colors.red
+  ];
 
+  // Tipado 
+  Future<WhetherApi> fetchPosts() async {
+    final response = await http.get(
+      Uri.parse(EARTHQUAKE_URL),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return WhetherApi.fromJson(data);
+    } else {
+      throw Exception("Server Under Maintenance");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: Color(0xFFFAFAFA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
         title: Text(widget.title),
       ),
-      body:Container(
-        child: FutureBuilder(
-          future: fetchPosts(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if(snapshot.data == null){
-              return Container(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                )
+      body: FutureBuilder<WhetherApi>(
+        future: fetchPosts(),
+        builder: (BuildContext context, AsyncSnapshot<WhetherApi> snapshot) {
+
+          // Cargando
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Error
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text("Sorry for Inconvenience, Server Under Maintenance"),
+            );
+          }
+
+          final data = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: data.features?.length ?? 0,
+            itemBuilder: (BuildContext context, int index) {
+
+              final feature = data.features![index];
+
+              // null safety aplicada
+              final mag = feature.properties?.mag ?? 0;
+              final placeText =
+                  feature.properties?.place ?? "Unknown, Unknown";
+
+              List<String> places = placeText.split(",");
+
+              var circleContent = Container(
+                margin: EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width / 19,
+                ),
+                child: Text(
+                  mag.ceil().toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               );
-            }
-            else if(snapshot.data!=null){
-              if(snapshot.data=="Sorry for Inconvenience, Server Under Maintenance"){
-                return Container(
-                  child: Center(
-                    child: Text(snapshot.data),
-                  )
-                );
-              }
-              else{
-                return ListView.builder(
-          
-            itemBuilder: (BuildContext context,int index){
-              
-          return Container(
-            decoration: BoxDecoration(
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Color(0xFFE0E0E0),
-                    offset: Offset(0.5, 0.5),
-                    blurRadius: 10.0,
-                  ),
-                ],
-                shape: BoxShape.rectangle,
-                color: Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            margin: EdgeInsets.all(8),
-            padding: EdgeInsets.all(8),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width/6,
-                  child:
-                Container(
-                  
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                        color:Colors.red,
 
-                  ),
-                  child:Container(
-                    margin: EdgeInsets.only(left:MediaQuery.of(context).size.width/19),
-                    child:Text("1",style: TextStyle(color:Colors.white,fontSize: 16,fontWeight: FontWeight.w700),))
-                )),
+              return Container(
+                decoration: BoxDecoration(
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0xFFE0E0E0),
+                      offset: Offset(0.5, 0.5),
+                      blurRadius: 10.0,
+                    ),
+                  ],
+                  color: const Color(0xFFFAFAFA),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width / 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors[
+                            mag.ceil() > 4
+                                ? 4
+                                : mag.ceil() == 0
+                                    ? 0
+                                    : mag.ceil() - 1
+                          ],
+                        ),
+                        child: circleContent,
+                      ),
+                    ),
 
-                Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                  children:<Widget>[
-                   Text("Banglore",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w700)),
-                    Text("15 Km from Banglore",style: TextStyle(fontSize: 12))
+                    const SizedBox(width: 10),
 
-                  ]
-                  ),
-                )
-              ],
-            ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          places.last.trim(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          places.first,
+                          style: const TextStyle(fontSize: 12),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              );
+            },
           );
-    });
-              }
-            }
-            throw UnimplementedError();
-          },
-          ) 
-    ));
-
-    
+        },
+      ),
+    );
   }
 }
